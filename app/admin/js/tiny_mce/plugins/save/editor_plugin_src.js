@@ -1,5 +1,5 @@
 /**
- * $Id: editor_plugin_src.js 851 2008-05-26 15:38:49Z spocke $
+ * $Id: editor_plugin_src.js 531 2008-01-14 13:34:28Z spocke $
  *
  * @author Moxiecode
  * @copyright Copyright © 2004-2008, Moxiecode Systems AB, All rights reserved.
@@ -50,24 +50,27 @@
 		_save : function() {
 			var ed = this.editor, formObj, os, i, elementId;
 
+			if (ed.getParam("fullscreen_is_enabled"))
+				return true;
+
 			formObj = tinymce.DOM.get(ed.id).form || tinymce.DOM.getParent(ed.id, 'form');
 
 			if (ed.getParam("save_enablewhendirty") && !ed.isDirty())
-				return;
-
-			tinyMCE.triggerSave();
-
-			// Use callback instead
-			if (os = ed.getParam("save_onsavecallback")) {
-				if (ed.execCallback('save_onsavecallback', ed)) {
-					ed.startContent = tinymce.trim(ed.getContent({format : 'raw'}));
-					ed.nodeChanged();
-				}
-
-				return;
-			}
+				return true;
 
 			if (formObj) {
+				tinyMCE.triggerSave();
+
+				// Use callback instead
+				if (os = ed.getParam("save_onsavecallback")) {
+					if (ed.execCallback('save_onsavecallback', ed)) {
+						ed.startContent = tinymce.trim(ed.getContent({format : 'raw'}));
+						ed.nodeChanged();
+					}
+
+					return;
+				}
+
 				ed.isNotDirty = true;
 
 				if (formObj.onsubmit == null || formObj.onsubmit() != false)
@@ -76,6 +79,8 @@
 				ed.nodeChanged();
 			} else
 				ed.windowManager.alert("Error: No form element found.");
+
+			return true;
 		},
 
 		_cancel : function() {

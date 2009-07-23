@@ -17,49 +17,17 @@ function add_single_quotes($arg)
 
 function get_categories()
 {
-    global $db;
-    $categories = array();
-    $sql = 'SELECT *
-                   FROM categories
-                   ORDER BY `category_order` ASC';
-    $result = $db->query($sql);
-    while ($row = $result->fetch_assoc())
-    {
-        $categories[] = array('id' => $row['id'], 'name' => $row['name'], 'var_name' => $row['var_name'], 'title' => $row['title'], 'description' => $row['description'], 'keywords' => $row['keywords']);
-    }
-    return $categories;
-}
-
-function get_seo_title($id)
-{
-    global $db;
-    $sql = 'SELECT *
-                   FROM categories
-                   WHERE var_name = "'.$id.'"';
-    $result = $db->query($sql);
-    $row = $result->fetch_assoc();
-    return $row['title'];
-}
-
-function get_seo_desc($id)
-{
-    global $db;
-    $sql = 'SELECT *
-                   FROM categories
-                   WHERE var_name = "'.$id.'"';
-    $result = $db->query($sql);
-    $row = $result->fetch_assoc();
-    return $row['description'];
-}
-function get_seo_keys($id)
-{
-    global $db;
-    $sql = 'SELECT *
-                   FROM categories
-                   WHERE var_name = "'.$id.'"';
-    $result = $db->query($sql);
-    $row = $result->fetch_assoc();
-    return $row['keywords'];
+	global $db;
+	$categories = array();
+	$sql = 'SELECT id, name, var_name
+	               FROM categories
+	               ORDER BY `category_order` ASC';
+	$result = $db->query($sql);
+	while ($row = $result->fetch_assoc())
+	{
+		$categories[] = array('id' => $row['id'], 'name' => $row['name'], 'var_name' => $row['var_name']);
+	}
+	return $categories;
 }
 
 function get_articles()
@@ -77,24 +45,40 @@ function get_articles()
 	return $articles;
 }
 
+function get_types()
+{
+	global $db;
+	$types = array();
+	$sql = 'SELECT id, name
+	               FROM types
+	               ORDER BY id ASC';
+	$result = $db->query($sql);
+	while ($row = $result->fetch_assoc())
+	{
+		$types[] = array('id' => $row['id'], 'name' => $row['name']);
+	}
+	return $types;
+}
 
 function get_cities()
 {
 	global $db;
-	
 	$cities = array();
-	
-	$sql = 'SELECT id, name, ascii_name
+	$sql = 'SELECT id, name
 	               FROM cities
 	               ORDER BY id ASC';
-	
 	$result = $db->query($sql);
-	
 	while ($row = $result->fetch_assoc())
 	{
-		$cities[] = array('id' => $row['id'], 'name' => $row['name'], 'ascii_name' => $row['ascii_name']);
+		if (count($cities) < 1)
+		{
+			$cities[] = array('id' => $row['id'], 'name' => '-- ' . $row['name'] . ' --');
+		}
+		else
+		{
+			$cities[] = array('id' => $row['id'], 'name' => $row['name']);
+		}
 	}
-	
 	return $cities;
 }
 
@@ -110,127 +94,12 @@ function get_categ_id_by_varname($var_name)
 function get_city_id_by_asciiname($ascii_name)
 {
 	global $db;
-	
-	$city = null;
-	
+	$cities = array();
 	$sql = 'SELECT id, name
 	               FROM cities
 	               WHERE ascii_name = "' . $ascii_name . '"';
-
 	$result = $db->query($sql);
 	$row = $result->fetch_assoc();
-	
-	if ($row)
-		$city = array('id' => $row['id'], 'name' => $row['name']);
-		
-	return $city;
-}
-
-/**
-* Converts the multidimensional array that results after calling parse_ini_file (filePath, processSections = true)
-* to a JSON string.
-* The resulting JSON string will look something like this:
-* {"sectionOne": {"messageKeyOne": "messageTextOne", "messageKeyTwo": "messageTextTwo"}, "sectionTwo": {....},....}
-*
-* @author putypuruty
-*/
-function iniSectionsToJSON($iniSections)
-{
-	$translationsJson = "{";
-	$sectionsCount = 0;
-		
-	foreach ($iniSections as $section => $sectionMessages)
-	{
-		$translationsJson = $translationsJson . "\"" . $section . "\": {";
-		$sectionMessagesCount = 0;
-		
-		foreach ($sectionMessages as $messageKey => $messageText)
-		{
-			$translationsJson = $translationsJson . "\"".$messageKey . "\":\"" . preg_replace("/\r?\n/", "\\n", addslashes($messageText)) . "\"";
-			
-			$sectionMessagesCount++;
-			
-			if ($sectionMessagesCount < count($sectionMessages))
-				$translationsJson .= ",";
-		}
-		$translationsJson .= "}";
-		
-		$sectionsCount++;
-
-		if ($sectionsCount < count($iniSections))
-			$translationsJson .= ",";
-	}
-	
-	$translationsJson = $translationsJson."}";
-	
-	return $translationsJson;
-}
-
-/**
- * Returns the city with the specified ID or null
- * if the city was not found.
- *
- * @param $cityID
- * @return 
- */
-function get_city_by_id($cityID)
-{
-	global $db;
-	
-	$city = null;
-	
-	$sql = 'SELECT id, name
-	               FROM cities
-	               WHERE id = ' . $cityID;
-	$result = $db->query($sql);
-	
-	$row = $result->fetch_assoc();
-	
-	if ($row)
-		$city = array('id' => $row['id'], 'name' => $row['name']);
-		
-	return $city;  
-}
-
-
-
-function get_types()
-{
-	global $db;
-	$sql = "select id, name, var_name 
-		FROM types ";
-	$result = $db->query($sql);
-	$types = array();
-	while($row = $result->fetch_assoc())
-	{
-		$types[] = array('id' => $row['id'], 'name' => $row['name'], 'var_name' => $row['var_name']);
-	}
-	return $types;
-}
-
-function get_type_id_by_varname($var_name)
-{
-	global $db;
-	$sql = "select id from types where 
-		var_name = '".$var_name."'";
-	$result = $db->query($sql);
-	$row = $result->fetch_assoc();
-	
-	if ($row)
-		return $row['id'];
-	return false;
-}
-
-function get_type_varname_by_id($id)
-{
-	global $db;
-	$sql = "select var_name from types where 
-		id = '".$id."'";
-	$result = $db->query($sql);
-	$row = $result->fetch_assoc();
-	
-	if ($row)
-		return $row['var_name'];
-	return false;
+	return array('id' => $row['id'], 'name' => $row['name']);
 }
 ?>

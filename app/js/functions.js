@@ -4,6 +4,7 @@
 		
 		jobber_url: "",
 		jobber_admin_url: "",
+		job_id: "",
 		
 		FixPng: function()
 		{
@@ -38,10 +39,10 @@
 
 		},
 		
-		PerformSearch: function(url, keywords)
+		PerformSearch: function(url)
 		{
 			clearTimeout(window.search_timer);	
-			$('#job-listings').load(url + encodeURIComponent(keywords) + '/');	
+			$('#job-listings').load(url + encodeURIComponent($('#keywords').fieldValue()) + '/');	
 			$("#indicator").hide();	
 		},
 		
@@ -52,13 +53,13 @@
 				document.getElementById("city_id").setAttribute("disabled", "disabled");
 				$("div#location_outside_ro").show();
 				document.getElementById("location_outside_ro_where").focus();
-				$("a#other_location_label").html(Jobber.I18n.js.location_pick_from_list);
+				$("a#other_location_label").html("pick one from the list");
 			}
 			else
 			{
 				document.getElementById("city_id").removeAttribute("disabled");
 				$("div#location_outside_ro").hide();
-				$("a#other_location_label").html(Jobber.I18n.js.location_other);
+				$("a#other_location_label").html("other");
 			}
 		},
 		
@@ -78,7 +79,7 @@
 		SendToFriend: {
 			showHide: function()
 			{
-				$("#send-to-friend").toggle();
+				$("#send-to-friend").SwitchVertically(10);
 			},
 
 			sendMsg: function()
@@ -86,12 +87,12 @@
 				$("#frm-send-to-friend").ajaxForm(function(responseText) { 
 					if (responseText == "0")
 					{
-						var msg = Jobber.I18n.js.send_to_friend_unsuccessful;
+						var msg = "Your message could not be sent. Did you enter both addresses?";
 						$("#send-to-friend-response").css({ color: "red" });
 					}
 					else
 					{
-						var msg = Jobber.I18n.js.send_to_friend_successful;
+						var msg = "Your message was sent. Let's hope it doesn't get marked as spam!";
 						$("#frm-send-to-friend").clearForm();
 						$("#send-to-friend-response").css({ color: "green" });
 					}
@@ -109,12 +110,12 @@
 			  success: function(msg) {
 			   	if (msg == "0")
 					{
-						var status = Jobber.I18n.js.report_spam_unsuccessful;
+						var status = "Thank you for your intention, but your vote could not be registered.";
 						$("#report-spam-response").css({ color: "red" });
 					}
 					else
 					{
-						var status = Jobber.I18n.js.report_spam_successful;
+						var status = "Thank you, your vote was registered and is highly appreciated!";
 						$("#frm-send-to-friend").clearForm();
 						$("#report-spam-response").css({ color: "green" });
 					}
@@ -122,15 +123,19 @@
 			  }
 			});
 		},
-		DeactivateLink: function(job_id)
-		{
+		DeactivateLink: function()
+		{	
+			
 			var url = Jobber.jobber_admin_url+'deactivate/';
-			Jobber.Deactivate(url, job_id);
+			Jobber.Deactivate(url, Jobber.job_id);
+			
 		},
-		ActivateLink: function(job_id)
-		{
+		ActivateLink: function()
+		{	
+			
 			var url = Jobber.jobber_admin_url+'activate/';
-			Jobber.Activate(url, job_id, 0);
+			Jobber.Activate(url, Jobber.job_id, 0);
+			
 		},
 		Activate: function(url, job_id, is_first_page)
 		{
@@ -149,17 +154,11 @@
 						}
 						else
 						{
-							var deactivateJobFunction = function()
-							{
-								Jobber.DeactivateLink(job_id);
-							};
-							
-							var linkElement = document.getElementById(currentLinkId);
-							linkElement.setAttribute('title', 'deactivate');
-							linkElement.setAttribute('onclick', deactivateJobFunction);
-							linkElement.onclick = deactivateJobFunction;
-							linkElement.innerHTML = '<img src="'+Jobber.jobber_url+'img/icon_deactivate.gif" alt="deactivate" />';
-							linkElement.id = 'deactivateLink'+job_id;
+							 Jobber.job_id = job_id;
+							 document.getElementById(currentLinkId).setAttribute('onclick', Jobber.DeactivateLink);
+							 document.getElementById(currentLinkId).onclick = Jobber.DeactivateLink; 
+							 document.getElementById(currentLinkId).innerHTML = '<img src="'+Jobber.jobber_url+'img/icon_deactivate.gif" alt="deactivate" />';
+							 document.getElementById(currentLinkId).id = 'deactivateLink'+job_id;
 						}	
 					}
 			  }
@@ -176,96 +175,19 @@
 			   	if (msg != "0")
 					{
 						var currentLinkId = 'deactivateLink'+job_id;
-						
-						var activateJobFunction = function()
-						{
-							Jobber.ActivateLink(job_id);
-						};
-						
-						var linkElement = document.getElementById(currentLinkId);
-						linkElement.setAttribute('title', 'activate');
-						linkElement.setAttribute('onclick', activateJobFunction);
-						linkElement.onclick = activateJobFunction;
-						linkElement.innerHTML = '<img src="'+Jobber.jobber_url+'img/icon_accept.gif" alt="activate" />';
-						linkElement.id = 'activateLink'+job_id;
+						Jobber.job_id = job_id;
+						document.getElementById(currentLinkId).setAttribute('onclick', Jobber.ActivateLink);
+						document.getElementById(currentLinkId).onclick = Jobber.ActivateLink;
+						document.getElementById(currentLinkId).innerHTML = '<img src="'+Jobber.jobber_url+'img/icon_accept.gif" alt="activate" />';
+						document.getElementById(currentLinkId).id = 'activateLink'+job_id;
 					}
 			  }
 			});
 		},
 		
-		DeactivateSpotlight: function(job_id)
-        {
-            var url = Jobber.jobber_admin_url+'deactivate-spotlight/';
-            Jobber.SpotlightDeactivate(url, job_id);
-        },
-        ActivateSpotlight: function(job_id)
-        {
-            var url = Jobber.jobber_admin_url+'activate-spotlight/';
-            Jobber.SpotlightActivate(url, job_id, 0);
-        },
-        SpotlightActivate: function(url, job_id, is_first_page)
-        {
-            $.ajax({
-              type: "POST",
-              url: url,
-              data: "job_id=" + job_id,
-              success: function(msg) {
-                   if (msg != "0")
-                    {
-                        var currentRowId = 'item'+job_id;
-                        var currentLinkId = 'activateSpotlight'+job_id;
-                        if(is_first_page == 1)
-                        {
-                            $("#"+currentRowId).css({ display: "none" });
-                        }
-                        else
-                        {
-                        	var deactivateSpotlightFunction = function()
-							{
-								Jobber.DeactivateSpotlight(job_id);
-							};
-							
-							var linkElement = document.getElementById(currentLinkId);
-							linkElement.setAttribute('title', 'deactivate-spotlight');
-                            linkElement.setAttribute('onclick', deactivateSpotlightFunction);
-                            linkElement.onclick = deactivateSpotlightFunction; 
-                            linkElement.innerHTML = '<img src="'+Jobber.jobber_url+'img/icon_spotlight_deactivate.gif" alt="deactivate" />';
-                            linkElement.id = 'deactivateSpotlight'+job_id;
-                        }    
-                    }
-              }
-            });
-        },
-        
-        SpotlightDeactivate: function(url, job_id)
-        {
-            $.ajax({
-              type: "POST",
-              url: url,
-              data: "job_id=" + job_id,
-              success: function(msg) {
-                   if (msg != "0")
-                    {
-                        var currentLinkId = 'deactivateSpotlight'+job_id;
-                        var activateSpotlightFunction = function()
-						{
-							Jobber.ActivateSpotlight(job_id);
-						};
-						
-						var linkElement = document.getElementById(currentLinkId);
-						linkElement.setAttribute('title', 'activate-spotlight');							
-                        linkElement.setAttribute('onclick', activateSpotlightFunction);
-                        linkElement.onclick = activateSpotlightFunction;
-                        linkElement.innerHTML = '<img src="'+Jobber.jobber_url+'img/icon_spotlight_activate.gif" alt="activate" />';
-                        linkElement.id = 'activateSpotlight'+job_id;
-                    }
-              }
-            });
-        },
-		
 		Delete: function(url, job_id)
 		{
-			if(confirm(Jobber.I18n.js.delete_job_confirmation_question))
+			if(confirm('Are you sure you want to delete this post?'))
 			{
 				$.ajax({
 				  type: "POST",

@@ -36,7 +36,13 @@
 							<td colspan="2">
 								{section name=tmp2 loop=$types}
 								<input class="no-border" type="radio" name="type_id" id="type_id_{$types[tmp2].id}" value="{$types[tmp2].id}" {if !$job.type_id && !$smarty.post.type_id}{if $types[tmp2].id == 1}checked="checked"{/if}{else}{if $types[tmp2].id == $job.type_id}checked="checked"{/if}{if $types[tmp2].id == $smarty.post.type_id}checked="checked"{/if}{/if} />
-								<label for="type_id_{$types[tmp2].id}"><img src="{$BASE_URL}img/icon-{$types[tmp2].var_name}.png" alt="{$types[tmp2].name}" /></label>
+								{if $types[tmp2].id == $smarty.const.JOBTYPE_FULLTIME}
+								<label for="type_id_{$types[tmp2].id}"><img src="{$BASE_URL}img/icon-fulltime.png" alt="full-time" /></label>
+								{elseif $types[tmp2].id == $smarty.const.JOBTYPE_PARTTIME}
+								<label for="type_id_{$types[tmp2].id}"><img src="{$BASE_URL}img/icon-parttime.png" alt="part-time" /></label>
+								{elseif $types[tmp2].id == $smarty.const.JOBTYPE_FREELANCE}
+								<label for="type_id_{$types[tmp2].id}"><img src="{$BASE_URL}img/icon-freelance.png" alt="freelance" /></label>
+								{/if}
 								{/section}&nbsp;&nbsp;
 								<select name="category_id" id="category_id" tabindex="1">
 									{section name=tmp1 loop=$categories}
@@ -58,7 +64,7 @@
 							<td>
 								<select name="city_id" id="city_id" tabindex="3" {if $job.location_outside_ro != '' OR $smarty.post.location_outside_ro_where != ''}disabled="disabled"{/if}>
 									{section name="c" loop=$cities}
-									<option value="{$cities[c].id}" {if $smarty.post.city_id == $cities[c].id || $job.city_id == $cities[c].id}selected="selected"{else}{if $user_city.id == $cities[c].id AND !$smarty.post.city_id AND !$job.city_id}selected="selected"{/if}{/if}>{if $cities[c].id == -1}-- {$cities[c].name} --{else}{$cities[c].name}{/if}</option>
+									<option value="{$cities[c].id}" {if $smarty.post.city_id == $cities[c].id || $job.city_id == $cities[c].id}selected="selected"{else}{if $user_city.id == $cities[c].id AND !$smarty.post.city_id AND !$job.city_id}selected="selected"{/if}{/if}>{$cities[c].name}</option>
 									{/section}
 								</select>
 								<a id="other_location_label" href="#" onclick="Jobber.HandleLocationOutsideRo(); return false;">{if $job.location_outside_ro != '' OR $smarty.post.location_outside_ro_where != ''}{$translations.publish.country}{else}{$translations.publish.other}{/if}</a>

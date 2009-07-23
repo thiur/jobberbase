@@ -100,9 +100,5 @@
 					</p>
 				</form>
 		</div><!-- #content -->
-{literal}
-	<script type="text/javascript">
-		jobberBase.editor();
-	</script>
-{/literal}
+
 {include file="footer.tpl"}

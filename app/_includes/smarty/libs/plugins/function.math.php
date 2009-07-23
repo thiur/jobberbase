@@ -14,7 +14,6 @@
  * Purpose:  handle math computations in template<br>
  * @link http://smarty.php.net/manual/en/language.function.math.php {math}
  *          (Smarty online manual)
- * @author   Monte Ohrt <monte at ohrt dot com>
  * @param array
  * @param Smarty
  * @return string
@@ -27,8 +26,7 @@ function smarty_function_math($params, &$smarty)
         return;
     }
 
-    // strip out backticks, not necessary for math
-    $equation = str_replace('`','',$params['equation']);
+    $equation = $params['equation'];
 
     // make sure parenthesis are balanced
     if (substr_count($equation,"(") != substr_count($equation,")")) {
@@ -59,7 +57,7 @@ function smarty_function_math($params, &$smarty)
                 $smarty->trigger_error("math: parameter $key: is not numeric");
                 return;
             }
-            $equation = preg_replace("/\b$key\b/", " \$params['$key'] ", $equation);
+            $equation = preg_replace("/\b$key\b/",$val, $equation);
         }
     }
 

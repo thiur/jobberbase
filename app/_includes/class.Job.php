@@ -16,8 +16,6 @@ class Job
 {
 	var $mId = false;
 	var $mTypeId = false;
-	var $mTypeVarName = false;
-	var $mTypeName = false;
 	var $mCategoryId = false;
 	var $mTitle = false;
 	var $mDescription = false;
@@ -38,8 +36,6 @@ class Job
 	var $mCategoryName = false;
 	var	$mClosedOn = false;
 	var	$mDaysOld = false;
-	var $mIsSpotlight = false;
-	var $mMySqlDate = false;
 	
 	function __construct($job_id = false)
 	{
@@ -49,14 +45,13 @@ class Job
 			$sanitizer = new Sanitizer;
 			$sql = 'SELECT a.type_id AS type_id, a.category_id AS category_id, a.title AS title, a.description AS description, 
 			               a.company AS company, a.url AS url, a.apply AS apply, 
-			               DATE_FORMAT(a.created_on, "' . DATE_FORMAT . '") AS created_on, a.created_on AS mysql_date,
-			               a.is_temp AS is_temp, a.is_active AS is_active, a.spotlight AS spotlight,
+			               DATE_FORMAT(a.created_on, \'%d-%m-%Y\') AS created_on, a.created_on AS mysql_date,
+			               a.is_temp AS is_temp, a.is_active AS is_active, 
 			               a.views_count AS views_count, a.auth AS auth, a.city_id AS city_id, a.outside_location AS outside_location,
 			               a.poster_email AS poster_email, a.apply_online AS apply_online, b.name AS category_name,
-			               c.var_name as type_var_name, c.name as type_name,
 			               DATE_ADD(created_on, INTERVAL 30 DAY) AS closed_on, DATEDIFF(NOW(), created_on) AS days_old
-			               FROM jobs a, categories b, types c
-			               WHERE a.category_id = b.id AND c.id = a.type_id AND a.id = ' . $job_id;
+			               FROM jobs a, categories b
+			               WHERE a.category_id = b.id AND a.id = ' . $job_id;
 			$result = $db->query($sql);
 			$row = $result->fetch_assoc();
 			if (!empty($row))
@@ -94,9 +89,7 @@ class Job
 				$this->mUrlTitle = $sanitizer->sanitize_title_with_dashes($this->mTitle . ' at ' . $this->mCompany);
 				$this->mApplyOnline = $row['apply_online'];
 				$this->mDaysOld = $row['days_old'];
-				$this->mIsSpotlight = $row['spotlight'];
-				$this->mTypeName = $row['type_name'];
-				$this->mTypeVarName = $row['type_var_name'];
+				$this->mIsActive = $row['is_active'];
 			}
 		}
 	}
@@ -124,11 +117,9 @@ class Job
 								 'location_outside_ro' => $this->mLocationOutsideRo,
 								 'poster_email' => $this->mPosterEmail,
 								 'apply_online' => $this->mApplyOnline,
+								 'check_poster_email' => $this->CheckPosterEmail(),
 								 'is_active' => $this->mIsActive,
-								 'days_old' => $this->mDaysOld,
-								 'is_spotlight' => $this->mIsSpotlight,
-								 'type_name' => $this->mTypeName,
-								 'type_var_name' => $this->mTypeVarName);
+								 'days_old' => $this->mDaysOld);
 		return $job;
 	}
 	
@@ -152,10 +143,7 @@ class Job
 								 'mysql_date' => $this->mMySqlDate,
 								 'location_outside_ro' => $this->mLocationOutsideRo,
 								 'is_active' => $this->mIsActive,
-								 'days_old' => $this->mDaysOld,
-								 'is_spotlight' => $this->mIsSpotlight,
-								 'type_name' => $this->mTypeName,
-								 'type_var_name' => $this->mTypeVarName);
+								 'days_old' => $this->mDaysOld);
 		return $job;
 	}
 
@@ -179,11 +167,7 @@ class Job
 								 'mysql_date' => $this->mMySqlDate,
 								 'location_outside_ro' => $this->mLocationOutsideRo,
 								 'days_old' => $this->mDaysOld,
-								 'is_active' => $this->mIsActive,
-								 'views_count' => $this->mViewsCount,
-								 'is_spotlight' => $this->mIsSpotlight,
-								 'type_name' => $this->mTypeName,
-								 'type_var_name' => $this->mTypeVarName);
+								 'is_active' => $this->mIsActive);
 		return $job;
 	}
 	
@@ -194,7 +178,7 @@ class Job
 	// $random: (1/0) randomize results?
 	// $days_behind: (int) only get results from last N days
 	// $for_feed: (boolean) is this request from rss feed?
-	public function GetJobs($type_id = false, $categ_id = false, $limit = false, $random, $days_behind, $for_feed = false, $city_id = false, $type_id = false, $spotlight = false)
+	public function GetJobs($type_id = false, $categ_id = false, $limit = false, $random, $days_behind, $for_feed = false, $city_id = false, $type_id = false)
 	{
 		global $db;
 		$jobs = array();
@@ -240,11 +224,6 @@ class Job
 		if ($type_id && is_numeric($type_id))
 		{
 			$conditions .= ' AND type_id = ' . $type_id;
-		}
-		
-		if ($spotlight &&  is_numeric($spotlight))
-    	{
-  			$conditions .= ' AND spotlight = ' . $spotlight;
 		}
 
 		if ($random == 1)
@@ -365,16 +344,27 @@ class Job
 	}
 	
 	//Get all inactive jobs for admin 
-	public function GetInactiveJobs($offset, $rowCount)
+	public function GetInactiveJobs( $limit = false, $limit2 = false)
 	{
 		global $db;
 		$jobs = array();
-		
+
+		if($limit>0 && $limit2>0)
+		{
+			$sql_limit = 'LIMIT ' . $limit .' , ' . $limit2;
+		}
+		else if ($limit > 0)
+		{
+			$sql_limit = 'LIMIT ' . $limit;
+		}
+		else
+		{
+		  $sql_limit = '';        
+		}
 		$sql = 'SELECT id
 		               FROM jobs
 		               WHERE 1 AND is_temp = 0 AND is_active = 0
-		               ORDER BY created_on DESC LIMIT ' . $offset .' , ' . $rowCount;
-		
+		               ORDER BY created_on DESC ' . $sql_limit;
 		$result = $db->query($sql);
 		while ($row = $result->fetch_assoc())
 		{
@@ -600,7 +590,7 @@ class Job
 			$sql_limit = 'LIMIT ' . $limit;
 		}
 		$i = 0;
-		$sql = 'SELECT ja.job_id, COUNT(ja.id) as nr FROM job_applications ja, jobs jbs WHERE ja.job_id = jbs.id GROUP BY ja.job_id 
+		$sql = 'SELECT job_id, COUNT(id) as nr FROM job_applications GROUP BY job_id 
 		               ORDER BY nr DESC ' . $sql_limit;
 		$result = $db->query($sql);
 		while ($row = $result->fetch_assoc())
@@ -621,7 +611,7 @@ class Job
 		$jobs = array();
 		$conditions = '';
 		$_SESSION['keywords_array'] = array();
-	  	$kw1 = $kw2 = $extra_conditions = '';
+	  $kw1 = $kw2 = $extra_conditions = '';
 		$found_city = false;
 
 		if (strstr($keywords, ',') || strstr($keywords, ', '))
@@ -637,8 +627,7 @@ class Job
 		}
 		else if (strstr($keywords, ' ') || strstr($keywords, '  '))
 		{
-			// filter out empty strings (can happen if there are many whitespaces between two words in the search string)
-			$tmp = array_filter(explode(' ', $keywords));
+			$tmp = explode(' ', $keywords);
 			foreach ($tmp as $word)
 			{
 				// try to find city based on city_id
@@ -647,11 +636,6 @@ class Job
 				$row = $result->fetch_assoc();
 				if ($row['id'] != '')
 				{
-					if ($found_city)
-					{
-						$conditions .= ' OR';
-					}
-					
 					$conditions .= ' city_id = ' . $row['id'];
 					$found_city = true;
 					$keywords = trim(str_replace($word, '', $keywords));
@@ -806,7 +790,7 @@ class Job
 		}
 	}
 
-	// Create a new job post
+	// Create a new job post (is_temp => 1)
 	public function Create($params)
 	{
 		global $db;
@@ -832,7 +816,7 @@ class Job
 		                                 ' . $params['city_id'] . ',
 		                                 "' . $params['url'] . '",
 		                                 "' . $params['apply'] . '",
-		                                 NOW(), ' . $params['is_temp'] . ', '. $params['is_active'] .', 0, "' . $this->GenerateAuthCode() . '", 
+		                                 NOW(), 1, 0, 0, "' . $this->GenerateAuthCode() . '", 
 		                                 "' . $params['location_outside_ro_where'] . '", "' . $params['poster_email'] . '", ' . $params['apply_online'] . ')';
 		$result = $db->query($sql);
 		return $db->insert_id;
@@ -906,22 +890,6 @@ class Job
 		$sql = 'UPDATE jobs SET is_active = 0 WHERE id = ' . $this->mId;
 		$db->query($sql);
 	}
-	
-	// Activate spotlight-feature for a job post
-    public function SpotlightActivate()
-    {
-        global $db;
-        $sql = 'UPDATE jobs SET spotlight = 1 WHERE id = ' . $this->mId;
-        $db->query($sql);
-    }
-    
-    // Deactivate spotlight-feature for a job post
-    public function SpotlightDeactivate()
-    {
-        global $db;
-        $sql = 'UPDATE jobs SET spotlight = 0 WHERE id = ' . $this->mId;
-        $db->query($sql);
-    }
 	
 	// Extend a post for 30 days
 	public function Extend()
@@ -1021,8 +989,8 @@ class Job
 	{
 		global $db;
 		$condition = '';
-	 	
-		if ($type)
+		$condition1 = '';
+	 	if ($categ && $type)
 		{
 			if (!is_numeric($type))
 			{
@@ -1033,10 +1001,9 @@ class Job
 				$type_id = $type;
 			}
 			
-			$condition .= ' AND type_id = ' . $type_id;
+			$condition1 = 'AND type_id = ' . $type_id;
 		}
-		
-		if ($categ)
+		else if ($categ)
 		{
 			if (!is_numeric($categ))
 			{
@@ -1047,11 +1014,14 @@ class Job
 				$categ_id = $categ;
 			}
 			
-			$condition .= ' AND category_id = ' . $categ_id;
+			$condition = 'AND category_id = ' . $categ_id;
 		}
-
-		$sql = 'SELECT COUNT(id) AS total FROM jobs WHERE is_temp = 0 AND is_active = 1' . $condition;
-		
+		else
+		{
+			$condition = '';
+		}
+		$sql = 'SELECT COUNT(id) AS total FROM jobs WHERE is_temp = 0 AND is_active = 1 ' . $condition . ' ' .$condition1;
+	
 		$result = $db->query($sql);
 		$row = $result->fetch_assoc();
 		return $row['total'];	
@@ -1095,90 +1065,14 @@ class Job
 	public function GetJobsCountForAllCategs()
 	{
 		global $db;
-		$jobsCountPerCategory = array();
-		
-		$sql = 'SELECT category_id, COUNT(id) AS total FROM jobs WHERE is_temp = 0 AND is_active = 1 GROUP BY category_id'; 
-		$result = $db->query($sql);
-		
-		while ($row = $result->fetch_assoc())
-			$jobsCountPerCategory[$row['category_id']] = $row['total'];
-			
 		$categs = get_categories();
 		$result = array();
 		foreach ($categs as $categ)
 		{
-			$count = 0;
-			
-			// this check is needed because we don't have an entry if there are no jobs for a category
-			if (isset($jobsCountPerCategory[$categ['id']]))
-				$count = $jobsCountPerCategory[$categ['id']];
-				
-			$result[] = array('categ_name' => $categ['name'], 'UTF-8', 'categ_count' => $count, 'categ_varname' => $categ['var_name']);
+			$count = $this->CountJobs($categ['id']);
+			$result[] = array('categ_name' => strtolower($categ['name']), 'categ_count' => $count, 'categ_varname' => $categ['var_name']);
 		}
 		return $result;
-	}
-	
-	public function GetJobsCountPerCity($excludeCitiesWithNoJobs)
-	{
-		global $db;
-		$jobsCountPerCity = array();
-		
-		$sql = 'SELECT city_id, COUNT(id) AS total FROM jobs WHERE is_temp = 0 AND is_active = 1 GROUP BY city_id'; 
-		$result = $db->query($sql);
-		
-		while ($row = $result->fetch_assoc())
-			$jobsCountPerCity[$row['city_id']] = $row['total'];
-			
-		$cities = get_cities();
-		$result = array();
-		foreach ($cities as $city)
-		{
-			$count = 0;
-			
-			// this check is needed because we don't have an entry if there are no jobs for a city
-			if (isset($jobsCountPerCity[$city['id']]))
-				$count = $jobsCountPerCity[$city['id']];
-
-			if ($count > 0)
-				$result[] = array('city_name' => $city['name'], 'jobs_in_city' => $count, 'city_ascii_name' => $city['ascii_name']);
-			else 
-			{
-				if (!$excludeCitiesWithNoJobs)
-					$result[] = array('city_name' => $city['name'], 'jobs_in_city' => $count, 'city_ascii_name' => $city['ascii_name']);
-			}
-					
-		}
-		return $result;
-	}
-	
-	public function GetJobsCountForCity($city_id, $type)
-	{
-		global $db;
-		
-		$jobsCountPerCity = array();
-		$condition = '';
-		
-		if ($type)
-		{
-			if (!is_numeric($type))
-			{
-				$type_id = $this->GetTypeId($type);
-			}
-			else
-			{
-				$type_id = $type;
-			}
-			
-			$condition .= ' AND type_id = ' . $type_id;
-		}
-		
-		$sql = 'SELECT COUNT(id) AS total FROM jobs WHERE is_temp = 0 AND is_active = 1 and city_id = '. $city_id . $condition;
-
-		$result = $db->query($sql);
-		
-		$row = $result->fetch_assoc();
-		
-		return $row['total'];
 	}
 	
 	// Check if the poster of this post has posted before with this e-mail address
@@ -1189,7 +1083,6 @@ class Job
 		                  WHERE poster_email = "' . strtolower($this->mPosterEmail) . '" AND id <> ' . $this->mId . ' AND is_temp = 0
  		                        AND (is_active = 1 OR (is_active = 0 AND DATEDIFF(NOW(), created_on) > 30))'; 
 		$result = $db->query($sql);
-				
 		$row = $result->fetch_assoc();
 		if (!empty($row['poster_email']))
 		{
@@ -1199,43 +1092,6 @@ class Job
 		{
 			return 0;
 		}
-	}
-	
-	/**
-	 * Returns an associative array containing the
-	 * @param $jobIDs an array of job IDs
-	 * @return
-	 */
-	public function GetApplicationsStatistics($jobIDs)
-	{
-		global $db;
-		
-		$statisticalData = array();
-		
-		$sql = 'SELECT job_id, count(id) numberOfApplications, DATE_FORMAT(max(created_on), "' . DATE_TIME_FORMAT . '") lastApplicationOn 
-				FROM job_applications j 
-				WHERE job_id in (' . $this->buildCommaSeparatedIDsString($jobIDs) . ') GROUP BY job_id'; 
-		$result = $db->query($sql);
-		
-		while ($row = $result->fetch_assoc())
-			$statisticalData[$row['job_id']] = $row;
-			
-		return $statisticalData;
-	}
-	
-	private function buildCommaSeparatedIDsString($numbersArray)
-	{
-		$string = '';
-		
-		for ($i = 0; $i < count($numbersArray); $i++)
-		{
-			$string .= $numbersArray[$i];
-
-			if ($i < count($numbersArray) - 1)
-				$string .= ',';
-		}
-		
-		return $string;
 	}
 }
 ?>

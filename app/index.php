@@ -56,12 +56,6 @@
 			$flag = 1;
 			break;
 			
-		// per city
-		case 'jobs-in':
-			require_once 'page_city.php';
-			$flag = 1;
-			break;
-			
 		// search results
 		case 'search':
 			require_once 'page_search.php';
@@ -107,16 +101,6 @@
 			$flag = 1;
 			break;
 			
-		case 'confirm':
-      $flag =1;
-      $job = new Job($id);
-      $job_title = BASE_URL . 'job/' . $job->mId . '/' . $job->mUrlTitle . '/';
-      $smarty->assign('auth', $job->GetAuth());
-      $smarty->assign('job_url', $job_title);
-      $smarty->assign('first_time_post', $extra);
-      $template = 'publish-confirmation.tpl';
-      break;
-			
 		// deactivate a post
 		case 'deactivate':
 			require_once 'page_deactivate.php';
@@ -136,6 +120,15 @@
 			
 		case 'sitemap':
 			$template = 'sitemap.tpl';
+			$flag = 1;
+			break;
+			
+		case 'stats':
+			require_once '_includes/class.Stats.php';
+			$stats = new Stats();
+			$smarty->assign('applications', $stats->Applications());
+			$smarty->assign('keywordz', $stats->Keywords());
+			$template = 'stats.tpl';
 			$flag = 1;
 			break;
 			
@@ -195,16 +188,13 @@
 	// if page not found
 	if ($flag == 0)
 	{
-		redirect_to(BASE_URL . 'page-unavailable/', '404');
+		redirect_to(BASE_URL . 'page-unavailable/');
 	}
-	
-	// create a JSON string from the translations array
-	$smarty->assign('translationsJson', iniSectionsToJSON($translations));
 	
 	// get job categories and cities
 	$smarty->assign('categories', get_categories());
 	$smarty->assign('articles', get_articles());
-	//$smarty->assign('types', get_types());
+	$smarty->assign('cities', get_cities());
 	
 	$smarty->assign('CURRENT_PAGE', $page);
 	$smarty->assign('CURRENT_ID', $id);

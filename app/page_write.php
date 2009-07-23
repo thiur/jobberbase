@@ -92,9 +92,7 @@
 			              'category_id' => $category_id,
 			              'type_id' => $type_id,
 			              'description' => $description,
-						  'location_outside_ro_where' => $location_outside_ro_where,
-						  'is_temp' => 1,
-						  'is_active' => 0,
+										'location_outside_ro_where' => $location_outside_ro_where,
 			              'apply' => '',
 			              'poster_email' => $poster_email,
 			              'apply_online' => $apply_online);
@@ -194,8 +192,6 @@
 	
 	$smarty->assign('categories', get_categories());
 	$smarty->assign('types', get_types());
-	$smarty->assign('cities', get_cities());
-	
 	if ($later_edit)
 	{
 		$html_title = $translations['jobs']['title_edit'] . ' / ' . SITE_NAME;

@@ -17,12 +17,6 @@
 	$page = (isset($_app_info['params'][0]) ? $db->real_escape_string($_app_info['params'][0]) : '');
 	$id = (isset($_app_info['params'][1]) ? $db->real_escape_string($_app_info['params'][1]) : 0);
 	$extra = (isset($_app_info['params'][2]) ? $db->real_escape_string($_app_info['params'][2]) : '');
-	if (file_exists(APP_PATH . '_includes' . DIRECTORY_SEPARATOR . 'translations.ini')) {
-		$translations = parse_ini_file(APP_PATH . '_includes' . DIRECTORY_SEPARATOR . 'translations.ini', true);
-		$smarty->assign('translations', $translations);
-	} else {
-		trigger_error('Unable to find the translations file!');
-	}
 	
 	$flag = 0;
 	$js = array();
@@ -130,16 +124,6 @@
 			$flag = 1;
 			break;
 
-		case 'stats':
-			if(!isset($_SESSION['AdminId']))
-			{
-				redirect_to(BASE_URL);
-				exit;
-			}
-			require_once 'page_stats.php';
-			$flag = 1;
-			break;
-
 		case 'pages':
 			if(!isset($_SESSION['AdminId']))
 			{
@@ -158,15 +142,6 @@
 			require_once 'page_categories.php';
 			$flag = 1;
 			break;
-		case 'types':
-			if(!isset($_SESSION['AdminId']))
-			{
-				redirect_to(BASE_URL);
-				exit;
-			}
-			require_once 'page_types.php';
-			$flag = 1;
-			break;
 		case 'password':
 			if(!isset($_SESSION['AdminId']))
 			{
@@ -178,45 +153,6 @@
 			$template = 'password.tpl';
 			$flag = 1;
 			break;
-		case 'edit-post':
-			if(!isset($_SESSION['AdminId']))
-			{
-				redirect_to(BASE_URL);
-				exit;
-			}
-			require_once 'page_edit_post.php';
-			$flag = 1;
-			break;
-		case 'activate-spotlight':
-            if(!isset($_SESSION['AdminId']))
-            {
-                redirect_to(BASE_URL);
-                exit;
-            }
-            require_once 'page_activate_spotlight.php';
-            $flag = 1;
-            break;
-   		case 'deactivate-spotlight':
-            if(!isset($_SESSION['AdminId']))
-            {
-                redirect_to(BASE_URL);
-                exit;
-            }
-            require_once 'page_deactivate_spotlight.php';
-            $flag = 1;
-            break;
-   		case 'cities':
-	  		if(!isset($_SESSION['AdminId']))
-            {
-                redirect_to(BASE_URL);
-                exit;
-            }
-            
-   			require_once 'page_cities.php';
-   			$flag = 1;
-   			$citiesPage = new CitiesPage();
-   			$template = $citiesPage->processRequest($id, $extra, $smarty);
-   			break;
 		default: 
 			$flag = 0;	
 			break;
@@ -227,11 +163,9 @@
 		redirect_to(BASE_URL . 'page-unavailable/');
 	}
 	
-	// create a JSON string from the translations array
-	$smarty->assign('translationsJson', iniSectionsToJSON($translations));
-	
 	// get job categories and cities
 	$smarty->assign('categories', get_categories());
+	$smarty->assign('cities', get_cities());
 	
 	$smarty->assign('CURRENT_PAGE', $page);
 	$smarty->assign('CURRENT_ID', $id);

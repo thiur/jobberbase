@@ -95,8 +95,18 @@ class Feed
 			$properties['description'] .= '<a href="' . BASE_URL . 'job/' . $job['id'] . '/' . $job['url_title'] . '/' . '">Apply to this job</a><br />';
 			$properties['link'] = BASE_URL . 'job/' . $job['id'] . '/' . $job['url_title'] . '/';
 
-			$type = '['.$job['type_name'].']';
-			
+			if ($job['type_id'] == JOBTYPE_FULLTIME)
+			{
+				$type = '[full-time]';
+			}
+			else if ($job['type_id'] == JOBTYPE_PARTTIME)
+			{
+				$type = '[part-time]';
+			}
+			else if ($job['type_id'] == JOBTYPE_FREELANCE)
+			{
+				$type = '[freelance]';
+			}
 			$properties['title'] = $type . ' ' . $job['title'] . ' at ' . $job['company'];
 			$properties['dc:date'] = $job['mysql_date'];
 			$rss_writer_object->additem($properties);

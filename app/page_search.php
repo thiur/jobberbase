@@ -1,9 +1,4 @@
 <?php
-	if ($id != '')
-	{
-		$id = urldecode($id);
-	}
-	 
 	if (strstr($id, '%7C'))
 	{
 		$id = str_replace('%7C', '|', $id);
@@ -63,7 +58,6 @@
 	}
 	else
 	{
-		$keywords = trim($keywords);
 		$smarty->assign('jobs', $job->Search($keywords));
 	}
 	// if user hit enter after entering a search query, we know this causes a 
@@ -81,12 +75,12 @@
 			$search->Save();
 			unset($_SESSION['search_keywords']);
 		}
-		$smarty->assign('keywords', stripslashes(htmlentities($requestKeywords, ENT_QUOTES, 'UTF-8')));
+		$smarty->assign('keywords', stripslashes(htmlentities($requestKeywords, ENT_QUOTES)));
 		$template = 'search.tpl';
 	}
 	else if ($id != '' && !strstr($id, '|'))
 	{
-		$smarty->assign('keywords', stripslashes(htmlentities($id, ENT_QUOTES, 'UTF-8')));
+		$smarty->assign('keywords', stripslashes(htmlentities($id, ENT_QUOTES)));
 		$template = 'search.tpl';
 	}
 	else

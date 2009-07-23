@@ -48,15 +48,18 @@
 
 			// setup live search
 			keywords.keyup(function(key) {
-				var searchKeywords = jQuery.trim(this.value);
-				var len = searchKeywords.length;
-				
-			    if (key.keyCode != 9 && len >= 3)
+				if (this.value == '')
+				{
+					$('#job-listings').load('{/literal}{$BASE_URL}{literal}search/{/literal}{$current_category}{literal}|/');
+				}
+				//var len = document.getElementById('keywords').value.length;
+				var len = this.value.length;
+			  if (key.keyCode != 9 && len >= 3)
 				{
 					$("#indicator").show();	
 					clearTimeout(window.search_timer);	
-					window.search_timer = setTimeout(function(){Jobber.PerformSearch('{/literal}{$BASE_URL}{literal}search/{/literal}{$current_category}{literal}|', searchKeywords)}, 800);
-			    }
+					window.search_timer = setTimeout("Jobber.PerformSearch('{/literal}{$BASE_URL}{literal}search/{/literal}{$current_category}{literal}|')", 800);
+			  }
 			});
 		});
 		Jobber.jobber_url = "{/literal}{$BASE_URL}{literal}";
@@ -79,14 +82,6 @@
 		if (isset($_SESSION['apply_fields']))
 		{
 			unset($_SESSION['apply_fields']);
-		}
-		if (isset($_SESSION['apply_allowed']))
-		{
-			unset($_SESSION['apply_allowed']);
-		}
-		if (isset($_SESSION['apply_successful']))
-		{
-			unset($_SESSION['apply_successful']);
 		}
 		if (isset($_SESSION['contact_msg_sent']))
 		{

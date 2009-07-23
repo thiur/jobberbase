@@ -1,5 +1,5 @@
 			<div id="job-details">
-				{if $smarty.session.apply_successful AND $smarty.session.apply_successful eq 1}
+				{if $smarty.session.apply_mail_sent AND $smarty.session.apply_mail_sent eq 1}
 				<div class="apply-status-ok">
 					{$translations.apply.success}
 				</div>
@@ -20,7 +20,13 @@
 				</div>
 				{/if}
 				<h2>
-					<img src="{$BASE_URL}img/icon-{$job.type_var_name}.png" alt="{$job.type_name}" /> {$job.title} 
+					{if $job.type_id == $smarty.const.JOBTYPE_FULLTIME}
+					<img src="{$BASE_URL}img/icon-fulltime.png" alt="full time" />
+					{elseif $job.type_id == $smarty.const.JOBTYPE_PARTTIME}
+					<img src="{$BASE_URL}img/icon-parttime.png" alt="part time" />
+					{elseif $job.type_id == $smarty.const.JOBTYPE_FREELANCE}
+					<img src="{$BASE_URL}img/icon-freelance.png" alt="freelance" />
+					{/if} {$job.title} 
 				</h2>
 				<p>
 					<span class="fading">at</span>
@@ -39,21 +45,15 @@
 				{$job.description}
 				</div><br />
 				{if $job.apply_online == 1 && $CURRENT_PAGE != 'verify'}
-					<div id="apply_online_now"><a href="#" onclick="$('#apply-online').toggle(); window.location.href = '#apply'; return false;">&raquo; Apply now</a><a href="#" name="apply">&nbsp;</a></div>
-					{if $smarty.session.apply_successful AND $smarty.session.apply_successful eq -1}
+					<div id="apply_online_now"><a href="#" onclick="$('#apply-online').SwitchVertically(10); document.getElementById('apply_name').focus(); window.location.href = '#apply'; return false;">&raquo; Apply now</a><a href="#" name="apply">&nbsp;</a></div>
+					{if $smarty.session.apply_mail_sent AND $smarty.session.apply_mail_sent eq -1}
 					<div class="validation-failure">
 						<img src="{$BASE_URL}img/icon-delete.png" alt="" />
-						{if $smarty.session.apply_allowed AND $smarty.session.apply_allowed eq -1}
-							{$translations.apply.error_apply_timeout_not_passed|replace:'%minutes%':$smarty.const.MINUTES_BETWEEN_APPLY_TO_JOBS_FROM_SAME_IP}
-						{elseif $smarty.session.apply_mail_sent AND $smarty.session.apply_mail_sent eq -1}
-							{$translations.apply.error_sending_mail}
-						{else}
-							{$translations.apply.errro_apply_data_invalid}
-						{/if}
+						{$translations.apply.failure}
 					</div>
 					{/if}
 				
-					<div id="apply-online" {if $smarty.session.apply_successful AND $smarty.session.apply_successful eq -1}style="display: block;"{else}style="display: none;"{/if}>
+					<div id="apply-online" {if $smarty.session.apply_mail_sent AND $smarty.session.apply_mail_sent eq -1}style="display: block;"{else}style="display: none;"{/if}>
 						<form id="frm-apply-online" method="post" enctype="multipart/form-data" action="{$BASE_URL}apply-online/">
 							<table>
 								<tr>
@@ -89,7 +89,7 @@
 								<tr>
 									<td colspan="2">
 										<input type="submit" name="submit" id="submit" value="{$translations.apply.submit}" /> {$translations.apply.or}
-										<a href="#" onclick="$('#apply-online').toggle(); return false;">{$translations.apply.cancel}</a>
+										<a href="#" onclick="$('#apply-online').SwitchVertically(10); return false;">{$translations.apply.cancel}</a>
 									</td>
 								</tr>
 							</table>
@@ -99,19 +99,15 @@
 				{/if}
 			</div><!-- #job-details -->
 {literal}
-	<script type="text/javascript">
-	$(document).ready(function() { 
-{/literal}
-{if $smarty.session.apply_successful AND $smarty.session.apply_successful eq -1}
-	{literal}
-		if (document.getElementById("apply_name"))
-		{
-			window.location.href = "#apply";
-			document.getElementById("apply_name").focus();	
-		}
-	{/literal}
-{/if}
-{literal}
+<script type="text/javascript">
+$(document).ready(function() { 
+	{/literal}{if $smarty.session.apply_mail_sent AND $smarty.session.apply_mail_sent eq -1}{literal}
+	if (document.getElementById("apply_name"))
+	{
+		window.location.href = "#apply";
+		document.getElementById("apply_name").focus();	
+	}
+	{/literal}{/if}{literal}
 	$("#frm-apply-online").validate({
 		rules: {
 			apply_name: { required: true },
@@ -126,6 +122,6 @@
 			apply_url: ' <img src="{/literal}{$BASE_URL}{literal}img/icon-delete.png" alt="" />'
 		}
 	});
-	}); 
-	</script>
+}); 
+</script>
 {/literal}

@@ -18,28 +18,21 @@ class JobApplication
 		$this->mJobId = $job_id;
 	}
 	
-	public function Apply($ip)
+	public function Apply()
 	{
 		global $db;
-		
-		$sql = 'INSERT INTO job_applications (job_id, created_on, ip)
-		                    VALUES (' . $this->mJobId . ', NOW(), "' . $ip . '")';
-		$db->query($sql);
-	}
-	
-	public function HasApplyTimeoutPassed($ip)
-	{
-		global $db;
+		$ip = $_SERVER['REMOTE_ADDR'];
 		
 		$sql = 'SELECT id
 		               FROM job_applications
-		               WHERE ip = "' . $ip . '" AND NOW() < DATE_ADD(created_on,INTERVAL ' . MINUTES_BETWEEN_APPLY_TO_JOBS_FROM_SAME_IP . ' MINUTE)';
+		               WHERE ip = "' . $ip . '" AND NOW() < DATE_ADD(created_on,INTERVAL 10 MINUTE)';
 		$result = $db->query($sql);
-		
 		$row = $result->fetch_assoc();
-		
 		if (empty($row))
 		{
+			$sql = 'INSERT INTO job_applications (job_id, created_on, ip)
+			                    VALUES (' . $this->mJobId . ', NOW(), "' . $ip . '")';
+			$db->query($sql);
 			return true;
 		}
 		else
