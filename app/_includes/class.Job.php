@@ -16,8 +16,6 @@ class Job
 {
 	var $mId = false;
 	var $mTypeId = false;
-	var $mTypeVarName = false;
-	var $mTypeName = false;
 	var $mCategoryId = false;
 	var $mTitle = false;
 	var $mDescription = false;
@@ -49,14 +47,13 @@ class Job
 			$sanitizer = new Sanitizer;
 			$sql = 'SELECT a.type_id AS type_id, a.category_id AS category_id, a.title AS title, a.description AS description, 
 			               a.company AS company, a.url AS url, a.apply AS apply, 
-			               DATE_FORMAT(a.created_on, "' . DATE_FORMAT . '") AS created_on, a.created_on AS mysql_date,
+			               DATE_FORMAT(a.created_on, \'%d-%m-%Y\') AS created_on, a.created_on AS mysql_date,
 			               a.is_temp AS is_temp, a.is_active AS is_active, a.spotlight AS spotlight,
 			               a.views_count AS views_count, a.auth AS auth, a.city_id AS city_id, a.outside_location AS outside_location,
 			               a.poster_email AS poster_email, a.apply_online AS apply_online, b.name AS category_name,
-			               c.var_name as type_var_name, c.name as type_name,
 			               DATE_ADD(created_on, INTERVAL 30 DAY) AS closed_on, DATEDIFF(NOW(), created_on) AS days_old
-			               FROM jobs a, categories b, types c
-			               WHERE a.category_id = b.id AND c.id = a.type_id AND a.id = ' . $job_id;
+			               FROM jobs a, categories b
+			               WHERE a.category_id = b.id AND a.id = ' . $job_id;
 			$result = $db->query($sql);
 			$row = $result->fetch_assoc();
 			if (!empty($row))
@@ -95,8 +92,6 @@ class Job
 				$this->mApplyOnline = $row['apply_online'];
 				$this->mDaysOld = $row['days_old'];
 				$this->mIsSpotlight = $row['spotlight'];
-				$this->mTypeName = $row['type_name'];
-				$this->mTypeVarName = $row['type_var_name'];
 			}
 		}
 	}
@@ -126,9 +121,7 @@ class Job
 								 'apply_online' => $this->mApplyOnline,
 								 'is_active' => $this->mIsActive,
 								 'days_old' => $this->mDaysOld,
-								 'is_spotlight' => $this->mIsSpotlight,
-								 'type_name' => $this->mTypeName,
-								 'type_var_name' => $this->mTypeVarName);
+								 'is_spotlight' => $this->mIsSpotlight);
 		return $job;
 	}
 	
@@ -153,9 +146,7 @@ class Job
 								 'location_outside_ro' => $this->mLocationOutsideRo,
 								 'is_active' => $this->mIsActive,
 								 'days_old' => $this->mDaysOld,
-								 'is_spotlight' => $this->mIsSpotlight,
-								 'type_name' => $this->mTypeName,
-								 'type_var_name' => $this->mTypeVarName);
+								 'is_spotlight' => $this->mIsSpotlight);
 		return $job;
 	}
 
@@ -181,9 +172,7 @@ class Job
 								 'days_old' => $this->mDaysOld,
 								 'is_active' => $this->mIsActive,
 								 'views_count' => $this->mViewsCount,
-								 'is_spotlight' => $this->mIsSpotlight,
-								 'type_name' => $this->mTypeName,
-								 'type_var_name' => $this->mTypeVarName);
+								 'is_spotlight' => $this->mIsSpotlight);
 		return $job;
 	}
 	
@@ -1212,7 +1201,7 @@ class Job
 		
 		$statisticalData = array();
 		
-		$sql = 'SELECT job_id, count(id) numberOfApplications, DATE_FORMAT(max(created_on), "' . DATE_TIME_FORMAT . '") lastApplicationOn 
+		$sql = 'SELECT job_id, count(id) numberOfApplications,  DATE_FORMAT(max(created_on), \'%d-%m-%Y %H:%i\') lastApplicationOn 
 				FROM job_applications j 
 				WHERE job_id in (' . $this->buildCommaSeparatedIDsString($jobIDs) . ') GROUP BY job_id'; 
 		$result = $db->query($sql);

@@ -78,7 +78,7 @@
 		SendToFriend: {
 			showHide: function()
 			{
-				$("#send-to-friend").toggle();
+				$("#send-to-friend").SwitchVertically(10);
 			},
 
 			sendMsg: function()
