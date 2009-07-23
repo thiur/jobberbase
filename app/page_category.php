@@ -1,9 +1,5 @@
 <?php
-	
-	$type_id = get_type_id_by_varname($extra);
-	$city_id = false;
-	
-	/*if ($extra == 'full-time')
+	if ($extra == 'full-time')
 	{
 		$type_id = JOBTYPE_FULLTIME;
 		$city_id = false;
@@ -22,7 +18,7 @@
 	{
 		$type_id = false;
 		$city_id = false;
-	}*/
+	}
 	
 	if($type_id && $id != 'all')
 	{
@@ -75,7 +71,6 @@
 	$smarty->assign("pages",$paginator->pages_link);
 	
 	$smarty->assign('jobs', $the_jobs);
-	$smarty->assign('types', get_types());
 	$smarty->assign('current_category', $id);
 
 	$smarty->assign('seo_title', get_seo_title($id));

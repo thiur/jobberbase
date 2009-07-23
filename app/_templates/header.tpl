@@ -20,6 +20,7 @@
 	<script src="{$BASE_URL}js/cmxforms.js" type="text/javascript"></script>
 	<script src="{$BASE_URL}js/jquery.metadata.js" type="text/javascript"></script>
 	<script src="{$BASE_URL}js/jquery.validate.pack.js" type="text/javascript" charset="iso-8859-1"></script>
+	<script src="{$BASE_URL}js/interface.js" type="text/javascript"></script>
 	<script src="{$BASE_URL}js/functions.js" type="text/javascript"></script>
 	<script src="{$BASE_URL}js/browser_detect.js" type="text/javascript"></script>
 	<script type="text/javascript">
@@ -55,11 +56,9 @@
 			<div id="search">
 				<form id="search_form" method="post" action="{$BASE_URL}search/">
 					<fieldset>
-						<div>
-							<input type="text" name="keywords" id="keywords" maxlength="30" value="{if $keywords}{$keywords}{else}{$translations.search.default}{/if}" />
-							<span id="indicator" style="display: none;"><img src="{$BASE_URL}img/ajax-loader.gif" alt="" /></span>
-						</div>
-						<div><label class="suggestionTop">{$translations.search.example}</label></div>
+						<input type="text" name="keywords" id="keywords" maxlength="30" value="{if $keywords}{$keywords}{else}{$translations.search.default}{/if}" />
+						<span id="indicator" style="display: none;"><img src="{$BASE_URL}img/ajax-loader.gif" alt="" /></span>
+						<label class="suggestionTop">{$translations.search.example}</label>
 					</fieldset>
 				</form>
 			</div><!-- #search -->

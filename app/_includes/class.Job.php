@@ -16,8 +16,6 @@ class Job
 {
 	var $mId = false;
 	var $mTypeId = false;
-	var $mTypeVarName = false;
-	var $mTypeName = false;
 	var $mCategoryId = false;
 	var $mTitle = false;
 	var $mDescription = false;
@@ -38,8 +36,6 @@ class Job
 	var $mCategoryName = false;
 	var	$mClosedOn = false;
 	var	$mDaysOld = false;
-	var $mIsSpotlight = false;
-	var $mMySqlDate = false;
 	
 	function __construct($job_id = false)
 	{
@@ -49,14 +45,13 @@ class Job
 			$sanitizer = new Sanitizer;
 			$sql = 'SELECT a.type_id AS type_id, a.category_id AS category_id, a.title AS title, a.description AS description, 
 			               a.company AS company, a.url AS url, a.apply AS apply, 
-			               DATE_FORMAT(a.created_on, "' . DATE_FORMAT . '") AS created_on, a.created_on AS mysql_date,
+			               DATE_FORMAT(a.created_on, \'%d-%m-%Y\') AS created_on, a.created_on AS mysql_date,
 			               a.is_temp AS is_temp, a.is_active AS is_active, a.spotlight AS spotlight,
 			               a.views_count AS views_count, a.auth AS auth, a.city_id AS city_id, a.outside_location AS outside_location,
 			               a.poster_email AS poster_email, a.apply_online AS apply_online, b.name AS category_name,
-			               c.var_name as type_var_name, c.name as type_name,
 			               DATE_ADD(created_on, INTERVAL 30 DAY) AS closed_on, DATEDIFF(NOW(), created_on) AS days_old
-			               FROM jobs a, categories b, types c
-			               WHERE a.category_id = b.id AND c.id = a.type_id AND a.id = ' . $job_id;
+			               FROM jobs a, categories b
+			               WHERE a.category_id = b.id AND a.id = ' . $job_id;
 			$result = $db->query($sql);
 			$row = $result->fetch_assoc();
 			if (!empty($row))
@@ -95,8 +90,6 @@ class Job
 				$this->mApplyOnline = $row['apply_online'];
 				$this->mDaysOld = $row['days_old'];
 				$this->mIsSpotlight = $row['spotlight'];
-				$this->mTypeName = $row['type_name'];
-				$this->mTypeVarName = $row['type_var_name'];
 			}
 		}
 	}
@@ -126,9 +119,7 @@ class Job
 								 'apply_online' => $this->mApplyOnline,
 								 'is_active' => $this->mIsActive,
 								 'days_old' => $this->mDaysOld,
-								 'is_spotlight' => $this->mIsSpotlight,
-								 'type_name' => $this->mTypeName,
-								 'type_var_name' => $this->mTypeVarName);
+								 'is_spotlight' => $this->mIsSpotlight);
 		return $job;
 	}
 	
@@ -153,9 +144,7 @@ class Job
 								 'location_outside_ro' => $this->mLocationOutsideRo,
 								 'is_active' => $this->mIsActive,
 								 'days_old' => $this->mDaysOld,
-								 'is_spotlight' => $this->mIsSpotlight,
-								 'type_name' => $this->mTypeName,
-								 'type_var_name' => $this->mTypeVarName);
+								 'is_spotlight' => $this->mIsSpotlight);
 		return $job;
 	}
 
@@ -180,10 +169,7 @@ class Job
 								 'location_outside_ro' => $this->mLocationOutsideRo,
 								 'days_old' => $this->mDaysOld,
 								 'is_active' => $this->mIsActive,
-								 'views_count' => $this->mViewsCount,
-								 'is_spotlight' => $this->mIsSpotlight,
-								 'type_name' => $this->mTypeName,
-								 'type_var_name' => $this->mTypeVarName);
+								 'is_spotlight' => $this->mIsSpotlight);
 		return $job;
 	}
 	
@@ -806,7 +792,7 @@ class Job
 		}
 	}
 
-	// Create a new job post
+	// Create a new job post (is_temp => 1)
 	public function Create($params)
 	{
 		global $db;
@@ -832,7 +818,7 @@ class Job
 		                                 ' . $params['city_id'] . ',
 		                                 "' . $params['url'] . '",
 		                                 "' . $params['apply'] . '",
-		                                 NOW(), ' . $params['is_temp'] . ', '. $params['is_active'] .', 0, "' . $this->GenerateAuthCode() . '", 
+		                                 NOW(), 1, 0, 0, "' . $this->GenerateAuthCode() . '", 
 		                                 "' . $params['location_outside_ro_where'] . '", "' . $params['poster_email'] . '", ' . $params['apply_online'] . ')';
 		$result = $db->query($sql);
 		return $db->insert_id;
@@ -1113,7 +1099,7 @@ class Job
 			if (isset($jobsCountPerCategory[$categ['id']]))
 				$count = $jobsCountPerCategory[$categ['id']];
 				
-			$result[] = array('categ_name' => $categ['name'], 'UTF-8', 'categ_count' => $count, 'categ_varname' => $categ['var_name']);
+			$result[] = array('categ_name' => strtolower($categ['name']), 'categ_count' => $count, 'categ_varname' => $categ['var_name']);
 		}
 		return $result;
 	}
@@ -1199,43 +1185,6 @@ class Job
 		{
 			return 0;
 		}
-	}
-	
-	/**
-	 * Returns an associative array containing the
-	 * @param $jobIDs an array of job IDs
-	 * @return
-	 */
-	public function GetApplicationsStatistics($jobIDs)
-	{
-		global $db;
-		
-		$statisticalData = array();
-		
-		$sql = 'SELECT job_id, count(id) numberOfApplications, DATE_FORMAT(max(created_on), "' . DATE_TIME_FORMAT . '") lastApplicationOn 
-				FROM job_applications j 
-				WHERE job_id in (' . $this->buildCommaSeparatedIDsString($jobIDs) . ') GROUP BY job_id'; 
-		$result = $db->query($sql);
-		
-		while ($row = $result->fetch_assoc())
-			$statisticalData[$row['job_id']] = $row;
-			
-		return $statisticalData;
-	}
-	
-	private function buildCommaSeparatedIDsString($numbersArray)
-	{
-		$string = '';
-		
-		for ($i = 0; $i < count($numbersArray); $i++)
-		{
-			$string .= $numbersArray[$i];
-
-			if ($i < count($numbersArray) - 1)
-				$string .= ',';
-		}
-		
-		return $string;
 	}
 }
 ?>

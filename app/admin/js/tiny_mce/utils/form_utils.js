@@ -1,5 +1,5 @@
 /**
- * $Id: form_utils.js 996 2009-02-06 17:32:20Z spocke $
+ * $Id: form_utils.js 520 2008-01-07 16:30:32Z spocke $
  *
  * Various form utilitiy functions.
  *
@@ -13,7 +13,7 @@ function getColorPickerHTML(id, target_form_element) {
 	var h = "";
 
 	h += '<a id="' + id + '_link" href="javascript:;" onclick="tinyMCEPopup.pickColor(event,\'' + target_form_element +'\');" onmousedown="return false;" class="pickcolor">';
-	h += '<span id="' + id + '" title="' + tinyMCEPopup.getLang('browse') + '">&nbsp;</span></a>';
+	h += '<span id="' + id + '" title="' + tinyMCEPopup.getLang('browse') + '"></span></a>';
 
 	return h;
 }
@@ -32,9 +32,7 @@ function setBrowserDisabled(id, state) {
 			lnk.removeAttribute("href");
 			tinyMCEPopup.dom.addClass(img, 'disabled');
 		} else {
-			if (lnk.getAttribute("realhref"))
-				lnk.setAttribute("href", lnk.getAttribute("realhref"));
-
+			lnk.setAttribute("href", lnk.getAttribute("realhref"));
 			tinyMCEPopup.dom.removeClass(img, 'disabled');
 		}
 	}
@@ -50,7 +48,7 @@ function getBrowserHTML(id, target_form_element, type, prefix) {
 
 	html = "";
 	html += '<a id="' + id + '_link" href="javascript:openBrowser(\'' + id + '\',\'' + target_form_element + '\', \'' + type + '\',\'' + option + '\');" onmousedown="return false;" class="browse">';
-	html += '<span id="' + id + '" title="' + tinyMCEPopup.getLang('browse') + '">&nbsp;</span></a>';
+	html += '<span id="' + id + '" title="' + tinyMCEPopup.getLang('browse') + '"></span></a>';
 
 	return html;
 }
@@ -170,7 +168,7 @@ function convertHexToRGB(col) {
 }
 
 function trimSize(size) {
-	return size.replace(/([0-9\.]+)px|(%|in|cm|mm|em|ex|pt|pc)/, '$1$2');
+	return size.replace(new RegExp('[^0-9%]', 'gi'), '');
 }
 
 function getCSSSize(size) {
@@ -179,11 +177,7 @@ function getCSSSize(size) {
 	if (size == "")
 		return "";
 
-	// Add px
-	if (/^[0-9]+$/.test(size))
-		size += 'px';
-
-	return size;
+	return size.indexOf('%') != -1 ? size : size + "px";
 }
 
 function getStyle(elm, attrib, style) {

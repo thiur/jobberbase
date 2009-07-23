@@ -4,6 +4,7 @@
 		
 		jobber_url: "",
 		jobber_admin_url: "",
+		job_id: "",
 		
 		FixPng: function()
 		{
@@ -78,7 +79,7 @@
 		SendToFriend: {
 			showHide: function()
 			{
-				$("#send-to-friend").toggle();
+				$("#send-to-friend").SwitchVertically(10);
 			},
 
 			sendMsg: function()
@@ -122,15 +123,19 @@
 			  }
 			});
 		},
-		DeactivateLink: function(job_id)
-		{
+		DeactivateLink: function()
+		{	
+			
 			var url = Jobber.jobber_admin_url+'deactivate/';
-			Jobber.Deactivate(url, job_id);
+			Jobber.Deactivate(url, Jobber.job_id);
+			
 		},
-		ActivateLink: function(job_id)
-		{
+		ActivateLink: function()
+		{	
+			
 			var url = Jobber.jobber_admin_url+'activate/';
-			Jobber.Activate(url, job_id, 0);
+			Jobber.Activate(url, Jobber.job_id, 0);
+			
 		},
 		Activate: function(url, job_id, is_first_page)
 		{
@@ -149,17 +154,11 @@
 						}
 						else
 						{
-							var deactivateJobFunction = function()
-							{
-								Jobber.DeactivateLink(job_id);
-							};
-							
-							var linkElement = document.getElementById(currentLinkId);
-							linkElement.setAttribute('title', 'deactivate');
-							linkElement.setAttribute('onclick', deactivateJobFunction);
-							linkElement.onclick = deactivateJobFunction;
-							linkElement.innerHTML = '<img src="'+Jobber.jobber_url+'img/icon_deactivate.gif" alt="deactivate" />';
-							linkElement.id = 'deactivateLink'+job_id;
+							 Jobber.job_id = job_id;
+							 document.getElementById(currentLinkId).setAttribute('onclick', Jobber.DeactivateLink);
+							 document.getElementById(currentLinkId).onclick = Jobber.DeactivateLink; 
+							 document.getElementById(currentLinkId).innerHTML = '<img src="'+Jobber.jobber_url+'img/icon_deactivate.gif" alt="deactivate" />';
+							 document.getElementById(currentLinkId).id = 'deactivateLink'+job_id;
 						}	
 					}
 			  }
@@ -176,32 +175,29 @@
 			   	if (msg != "0")
 					{
 						var currentLinkId = 'deactivateLink'+job_id;
-						
-						var activateJobFunction = function()
-						{
-							Jobber.ActivateLink(job_id);
-						};
-						
-						var linkElement = document.getElementById(currentLinkId);
-						linkElement.setAttribute('title', 'activate');
-						linkElement.setAttribute('onclick', activateJobFunction);
-						linkElement.onclick = activateJobFunction;
-						linkElement.innerHTML = '<img src="'+Jobber.jobber_url+'img/icon_accept.gif" alt="activate" />';
-						linkElement.id = 'activateLink'+job_id;
+						Jobber.job_id = job_id;
+						document.getElementById(currentLinkId).setAttribute('onclick', Jobber.ActivateLink);
+						document.getElementById(currentLinkId).onclick = Jobber.ActivateLink;
+						document.getElementById(currentLinkId).innerHTML = '<img src="'+Jobber.jobber_url+'img/icon_accept.gif" alt="activate" />';
+						document.getElementById(currentLinkId).id = 'activateLink'+job_id;
 					}
 			  }
 			});
 		},
 		
-		DeactivateSpotlight: function(job_id)
-        {
+		DeactivateSpotlight: function()
+        {    
+            
             var url = Jobber.jobber_admin_url+'deactivate-spotlight/';
-            Jobber.SpotlightDeactivate(url, job_id);
+            Jobber.SpotlightDeactivate(url, Jobber.job_id);
+            
         },
-        ActivateSpotlight: function(job_id)
-        {
+        ActivateSpotlight: function()
+        {    
+            
             var url = Jobber.jobber_admin_url+'activate-spotlight/';
-            Jobber.SpotlightActivate(url, job_id, 0);
+            Jobber.SpotlightActivate(url, Jobber.job_id, 0);
+            
         },
         SpotlightActivate: function(url, job_id, is_first_page)
         {
@@ -220,17 +216,11 @@
                         }
                         else
                         {
-                        	var deactivateSpotlightFunction = function()
-							{
-								Jobber.DeactivateSpotlight(job_id);
-							};
-							
-							var linkElement = document.getElementById(currentLinkId);
-							linkElement.setAttribute('title', 'deactivate-spotlight');
-                            linkElement.setAttribute('onclick', deactivateSpotlightFunction);
-                            linkElement.onclick = deactivateSpotlightFunction; 
-                            linkElement.innerHTML = '<img src="'+Jobber.jobber_url+'img/icon_spotlight_deactivate.gif" alt="deactivate" />';
-                            linkElement.id = 'deactivateSpotlight'+job_id;
+                             Jobber.job_id = job_id;
+                             document.getElementById(currentLinkId).setAttribute('onclick', Jobber.DeactivateSpotlight);
+                             document.getElementById(currentLinkId).onclick = Jobber.DeactivateSpotlight; 
+                             document.getElementById(currentLinkId).innerHTML = '<img src="'+Jobber.jobber_url+'img/icon_spotlight_deactivate.gif" alt="deactivate" />';
+                             document.getElementById(currentLinkId).id = 'deactivateSpotlight'+job_id;
                         }    
                     }
               }
@@ -247,17 +237,11 @@
                    if (msg != "0")
                     {
                         var currentLinkId = 'deactivateSpotlight'+job_id;
-                        var activateSpotlightFunction = function()
-						{
-							Jobber.ActivateSpotlight(job_id);
-						};
-						
-						var linkElement = document.getElementById(currentLinkId);
-						linkElement.setAttribute('title', 'activate-spotlight');							
-                        linkElement.setAttribute('onclick', activateSpotlightFunction);
-                        linkElement.onclick = activateSpotlightFunction;
-                        linkElement.innerHTML = '<img src="'+Jobber.jobber_url+'img/icon_spotlight_activate.gif" alt="activate" />';
-                        linkElement.id = 'activateSpotlight'+job_id;
+                        Jobber.job_id = job_id;
+                        document.getElementById(currentLinkId).setAttribute('onclick', Jobber.ActivateSpotlight);
+                        document.getElementById(currentLinkId).onclick = Jobber.ActivateSpotlight;
+                        document.getElementById(currentLinkId).innerHTML = '<img src="'+Jobber.jobber_url+'img/icon_spotlight_activate.gif" alt="activate" />';
+                        document.getElementById(currentLinkId).id = 'activateSpotlight'+job_id;
                     }
               }
             });

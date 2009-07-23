@@ -195,7 +195,7 @@
 	// if page not found
 	if ($flag == 0)
 	{
-		redirect_to(BASE_URL . 'page-unavailable/', '404');
+		redirect_to(BASE_URL . 'page-unavailable/');
 	}
 	
 	// create a JSON string from the translations array
@@ -204,7 +204,7 @@
 	// get job categories and cities
 	$smarty->assign('categories', get_categories());
 	$smarty->assign('articles', get_articles());
-	//$smarty->assign('types', get_types());
+	$smarty->assign('cities', get_cities());
 	
 	$smarty->assign('CURRENT_PAGE', $page);
 	$smarty->assign('CURRENT_ID', $id);

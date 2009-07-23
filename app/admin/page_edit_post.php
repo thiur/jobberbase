@@ -5,18 +5,12 @@
  * Business logic for editing a post.
  */
 	
-	//Note: $id is a job ID
-	
-if ($id != 0)
+	if ($id != 0)
 	{
-		$job = new Job($id);
-	}
-	else
-	{
-		$job = new Job();
+		$j = new Job($id);
 	}
 	
-	$jobToEdit = $job->GetInfo();
+	$jobToEdit = $j->GetInfo();
 	$smarty->assign_by_ref('job', $jobToEdit);
 	
 	$smarty->assign('show_preview', false);
@@ -60,9 +54,7 @@ if ($id != 0)
 		$jobToEdit['apply'] = '';
 		$jobToEdit['poster_email'] = $_POST['poster_email'];
 		$jobToEdit['apply_online'] = $_POST['apply_online'];
-		$jobToEdit['type_var_name'] = get_type_varname_by_id($_POST['type_id']);
-		$jobToEdit['type_id'] = $_POST['type_id'];
-		
+
 		$jobToEdit['textiledDescription'] = $textile->TextileThis($_POST['description']);
 		$jobToEdit['location_outside_ro'] = $jobToEdit['location_outside_ro_where'];
 		
@@ -84,6 +76,8 @@ if ($id != 0)
 			{
 				escape($_POST);	
 				
+				$job = new Job($job_id);
+				
 				$data = array('company' => $company,
 				          	  'url' => $url,
 				              'title' => $title,
@@ -96,17 +90,7 @@ if ($id != 0)
 				              'poster_email' => $poster_email,
 				              'apply_online' => $apply_online);
 				
-				if ($id != 0)
-				{
-					$job->Edit($data);
-				}
-				else
-				{
-					$data['is_temp'] = 0;
-					$data['is_active'] = 1;
-					
-					$job->Create($data);
-				}
+				$job->Edit($data);
 				
 				$jobCategName = $job->GetCategVarname($category_id);
 				
@@ -120,7 +104,6 @@ if ($id != 0)
 		
 	$smarty->assign('categories', get_categories());
 	$smarty->assign('types', get_types());
-	$smarty->assign('cities', get_cities());
 	
 	$html_title = $translations['jobs']['title_edit'] . ' / ' . SITE_NAME;
 	
