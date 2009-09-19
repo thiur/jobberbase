@@ -20,3 +20,7 @@ Listed below are some of the free Jobberbase Themes:
 Listed below are some of the Paid Jobberbase Themes
 
   * [http://www.jobbertemplates.com/jobbertabs/ JobberTabs] - Priced at $29.95, this template gives your Job Board a professional look and has navigation options via companies, cities and categories. 
+
+== List Your Theme Here ==
+
+If you want to get your theme listed here, post its link, the version of Jobberbase it supports and whether its free or paid.
