@@ -36,7 +36,7 @@ This page will contain all changes in Jobberbase ever since it was released.
 *Enhancements*
 
  * CSS of Frontend compressed by as much as 20%
- * TinyMCE, PhpMailer, Smarty and Jquery Updated to latest versions.
+ * TinyMCE, PHPMailer, Smarty and Jquery Updated to latest versions.
  * SEO Improvements - Job page now has proper meta tags, Sitemap page has a proper title and fixing of Duplicate Job urls.
  * Jobber word in background of search box removed
  * Added couple of required translations
