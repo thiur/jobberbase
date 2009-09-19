@@ -20,4 +20,4 @@ This will not be a big release and will probably contain small enhancements and 
 
 Send your [http://www.jobberbase.com/forum/forum3-feature-requests.html feature requests] and [http://www.jobberbase.com/forum/forum2-bug-reports.html bug reports] through [http://www.jobberbase.com/forum/ Jobberbase Forum].
 
-*Note* For Information on older versions, head to [[Changelog]]
+*Note* For Information on older versions, head to [Changelog]
