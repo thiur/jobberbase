@@ -1,0 +1,22 @@
+#summary List of Themes Available Publicly for Jobberbase.
+#labels Phase-Design
+
+== Themes ==
+
+This Page Lists some of the popular Jobberbase Themes and the versions they support. If you have created a theme for Jobberbase, feel free to add its link here. If the theme you are adding is paid, then only add direct links and not affiliate links if it has such.
+
+== Free Themes ==
+
+Listed below are some of the free Jobberbase Themes:
+
+  * [http://evertsemeijn.nl/2009/07/jobberbased-template-v2/ Jobberbased] - This template for Jobberbase works on version 1.7, supports category drop down and is coded without Tables. 
+
+  * [http://www.jobberbase.com/forum/topic470-hireme-theme.html HireMe Template] - This Template gives a very professional look to Jobberbase but works only on 1.6 version. You can update it manually to work in 1.7 too. 
+
+  * [http://www.redjump.co.cc/2009/05/14/simple-grey-theme/ Simple Grey] - This Theme provides relief by changing the default look of your Job Board. It includes only css changes and works on 1.7 version and can work on 1.6 too since it changes only css.
+
+== Paid Themes ==
+
+Listed below are some of the Paid Jobberbase Themes
+
+  * [http://www.jobbertemplates.com/jobbertabs/ JobberTabs] - Priced at $29.95, this template gives your Job Board a professional look and has navigation options via companies, cities and categories. 
